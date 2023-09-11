@@ -397,26 +397,32 @@ fu! unicode#GetUniChar(...) abort "{{{2
                 endif
                 let info  = get(s:info, dec, '')
 
-                let name  .= (empty(name) ? '' : ' ')
+                "let name  .= (empty(name) ? '' : ' ')
                 let dig   .= (empty(dig)  ? '' : ' ')
                 let html  .= (empty(html) ? '' : ' ')
-                let nerd  .= (empty(nerd) ? '' : ' ')
+                "let nerd  .= (empty(nerd) ? '' : ' ')
                 let info  .= (empty(info) ? '' : ' ')
                 let pat   .= (empty(pat)  ? '' : ' ')
                 let str   .= (empty(str)  ? '' : ' ')
-                call add(msg, printf("'%s' U+%04X Dec:%d %s%s%s%s%s%s%s", glyph,
+
+                let dig   = substitute(dig, '(', '[', '')
+                let dig   = substitute(dig, ')', ']', '')
+                let pat   = ''
+                let str   = ''
+                call add(msg, printf("'%s' U+%04X %d '%s' %s%s%s%s%s%s", glyph,
                         \ dec, dec, name, dig, html, info, pat, str, nerd))
                 if !empty(type)
                     if type==?'v'
                         call add(typelist, dec)
                     elseif type==?'d'
                         " remove () around the digraphs
-                        call add(typelist, substitute(dig, '[()]', '', 'g'))
+                        call add(typelist, substitute(dig, '[()\[\]]', '', 'g'))
                     elseif type==?'r'
                         " there is a trailing blank in pat
                         call add(typelist, matchstr(pat[1:], '\S\+'))
                     elseif type==?'h'
-                        call add(typelist, html)
+                        " Get only first html
+                        call add(typelist, matchstr(html, '\S\+'))
                     else
                         call add(typelist, name)
                     endif
@@ -1074,7 +1080,7 @@ fu! <sid>GetHtmlEntity(hex, all) abort "{{{2
         \ (a:hex < 127 || a:hex > 159) &&
         \ (a:hex < 55296 || a:hex > 57343)
         " Generate HTML Code only for where it is allowed (see wikipedia)
-        let html=printf("&#x%X;", a:hex)
+        let html=printf("&#x%x;", a:hex)
     endif
     return html
 endfu
